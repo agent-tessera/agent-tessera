@@ -1,0 +1,52 @@
+apiVersion: tessera/v1
+kind: AgentPolicy
+metadata:
+  agent: support-triage
+  environment: prod
+  owner: team-support@acme.com
+  risk_tier: medium
+  labels: { domain: support }
+
+spec:
+  models:
+    allow: ["openai/gpt-4.1*", "anthropic/claude-*"]
+    deny:  ["*/*-preview"]
+
+  tools:
+    allow:
+      - zendesk.read_ticket
+      - zendesk.add_comment
+    require_approval:
+      - name: zendesk.refund
+        when:                        # optional conditions on call arguments
+          - arg: amount
+            op: gt
+            value: 100
+    deny:
+      - "shell.*"
+
+  data:
+    allow: ["crm.customers:read"]
+
+  agents:
+    may_invoke: ["billing-agent"]
+    may_be_invoked_by: ["orchestrator"]
+
+  delegation:
+    allow_on_behalf_of: true
+    user_groups: ["support-staff"]   # users must be in one of these groups
+
+  limits:
+    cost_usd_per_day: 50
+    tokens_per_day: 2_000_000
+    calls_per_minute: { "zendesk.*": 30 }
+    max_steps_per_task: 25
+
+  guardrails:
+    required:
+      - input.prompt_injection
+      - output.pii_redaction
+    on_missing: block                # block | warn | flag
+
+  audit:
+    capture_content: false           # store prompts/responses (redacted) if true

@@ -1,0 +1,62 @@
+apiVersion: tessera/v1
+kind: AgentPolicy
+metadata:
+  agent: spend-guard
+  environment: prod
+  owner: team-billing@acme.com
+  risk_tier: medium
+  autonomy:
+    level: supervised
+    active_hours:
+      tz: Europe/Madrid
+      days: [mon-fri]
+      from: "08:00"
+      to: "20:00"
+spec:
+  models:
+    allow: ["openai/gpt-4.1*"]
+  tools:
+    allow:
+      - zendesk.read_ticket
+      - zendesk.refund
+  limits:
+    per_call:
+      max_output_tokens: 4096
+      max_input_tokens: 32000
+    concurrency:
+      max_in_flight_model_calls: 4
+      max_concurrent_runs: 10
+    run:
+      max_duration: 2h
+      max_steps: 50
+      max_cost_usd: 5
+    quotas:
+      - name: gpt41-per-user-daily
+        metric: tokens
+        kinds: [model]
+        resources: ["openai/gpt-4.1*"]
+        window: day
+        scope: principal
+        max: 200000
+        warn_at: 0.8
+      - name: refunds-per-hour
+        metric: tool_calls
+        resources: ["zendesk.refund"]
+        window: hour
+        scope: agent
+        max: 20
+        on_exhausted: suspend
+  circuit_breaker:
+    denials: 5
+    window: 10m
+    action: suspend
+  approvals:
+    route_to: [supervisor, owner]
+    timeout: 15m
+    forbid_self_approval: true
+  effects:
+    classify:
+      "zendesk.read_*": [read]
+      "zendesk.refund": [financial, irreversible]
+    deny: [delete, credential]
+    require_approval: [irreversible]

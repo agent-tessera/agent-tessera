@@ -1,0 +1,16 @@
+apiVersion: tessera/v1
+kind: AgentPolicy
+metadata:
+  agent: example
+  environment: dev
+spec:
+  models:
+    allow: ["*"]
+  tools:
+    allow: ["*"]
+  data:
+    allow: ["*"]
+  guardrails:
+    on_missing: flag
+  limits:
+    max_steps_per_task: 200

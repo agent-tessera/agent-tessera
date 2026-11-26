@@ -1,0 +1,135 @@
+[project]
+name = "agent-tessera-workspace"
+version = "0.0.0"
+description = "Development workspace for Agent Tessera (not published)."
+requires-python = ">=3.11"
+
+[tool.uv]
+package = false
+constraint-dependencies = [
+    "filelock>=4.2.1",
+]
+
+[tool.uv.workspace]
+members = ["sdk", "server"]
+
+[tool.uv.sources]
+agent-tessera = { workspace = true }
+agent-tessera-server = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "agent-tessera",
+    "agent-tessera-server",
+    "anthropic>=0.40",
+    "mypy>=1.13",
+    "openai>=1.50",
+    "opentelemetry-api>=1.27",
+    "opentelemetry-exporter-otlp-proto-http>=1.27",
+    "opentelemetry-sdk>=1.27",
+    "pre-commit>=4.0",
+    "psycopg[binary]>=3.2",
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "pytest-timeout>=2.3",
+    "ruff>=0.15",
+    "types-pyyaml>=6.0.12.20261103",
+]
+docs = [
+    "mkdocs-material>=9.5",
+    "mkdocstrings[python]>=0.27",
+]
+
+# --------------------------------------------------------------------------- ruff
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["sdk/src", "server/src"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes
+    "I",        # isort
+    "N",        # pep8-naming
+    "D",        # pydocstyle (Google convention, see below)
+    "UP",       # pyupgrade
+    "B",        # flake8-bugbear
+    "S",        # flake8-bandit (security)
+    "ANN",      # flake8-annotations
+    "A",        # flake8-builtins
+    "C4",       # flake8-comprehensions
+    "DTZ",      # naive datetimes
+    "T20",      # no print()
+    "PT",       # pytest style
+    "SIM",      # flake8-simplify
+    "RET",      # flake8-return
+    "PTH",      # prefer pathlib
+    "ERA",      # commented-out code
+    "PL",       # pylint
+    "PIE",      # flake8-pie
+    "PERF",     # performance anti-patterns
+    "TID",      # tidy imports (no relative imports)
+    "RUF",      # ruff-specific
+]
+ignore = [
+    "PLR0913",  # too many arguments: public APIs may legitimately take many keyword args
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["D", "ANN", "S101", "PLR2004"]
+"benchmarks/**" = ["D", "ANN", "S101", "PLR2004"]
+"examples/**" = ["D", "T20"]
+"web/e2e/**" = ["D", "ANN", "T20", "S101"]
+"web/tests/e2e/**" = ["D", "ANN", "T20", "S101"]
+
+[tool.ruff.format]
+docstring-code-format = true
+
+# --------------------------------------------------------------------------- mypy
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unreachable = true
+mypy_path = ["sdk/src", "server/src"]
+packages = ["agent_tessera", "tessera_server"]
+plugins = ["pydantic.mypy"]
+
+# --------------------------------------------------------------------------- pytest
+[tool.pytest.ini_options]
+testpaths = ["sdk/tests", "server/tests", "benchmarks"]
+pythonpath = ["server/tests"]
+addopts = [
+    "--import-mode=importlib",
+    "--strict-markers",
+    "--strict-config",
+    "-m",
+    "not benchmark",
+    "--cov=agent_tessera",
+    "--cov=tessera_server",
+    "--cov-report=term-missing",
+]
+markers = [
+    "benchmark: performance measurements excluded from the default run",
+]
+filterwarnings = ["error"]
+timeout = 60
+xfail_strict = true
+
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+fail_under = 85
+show_missing = true
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "@overload",
+]

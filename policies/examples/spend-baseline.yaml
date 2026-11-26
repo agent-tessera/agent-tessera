@@ -1,0 +1,28 @@
+apiVersion: tessera/v1
+kind: BaselinePolicy
+metadata:
+  name: spend-baseline
+spec:
+  selector:
+    environment: prod
+    autonomy: [supervised, autonomous]
+  limits:
+    per_call:
+      max_output_tokens: 2048
+    quotas:
+      - name: org-daily-cost
+        metric: cost_usd
+        window: day
+        scope: org
+        max: 500
+        warn_at: 0.8
+  circuit_breaker:
+    denials: 3
+    window: 5m
+    action: revoke_run
+  approvals:
+    route_to: [supervisor]
+    timeout: 10m
+  effects:
+    deny: [credential]
+    require_approval: [financial]

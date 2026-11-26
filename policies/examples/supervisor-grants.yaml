@@ -1,0 +1,9 @@
+apiVersion: tessera/v1
+kind: SupervisorGrants
+metadata:
+  supervisor: user:ada
+spec:
+  models:
+    allow: ["openai/gpt-4o"]
+  tools:
+    allow: ["files.read"]

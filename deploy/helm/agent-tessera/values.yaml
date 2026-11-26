@@ -1,0 +1,50 @@
+# External Postgres is the default. Set postgresql.enabled to try the
+# bundled subchart instead, and replace every sample secret before use.
+image:
+  repository: agent-tessera
+  tag: "0.4.1"
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+issuer: http://127.0.0.1:8700
+org: default
+
+database:
+  url: postgresql+psycopg://tessera:change-me@postgres.example:5432/tessera
+
+kek:
+  # Base64 of 32 bytes. Leave empty and set kek.existingSecret to supply
+  # the key from a secret you manage.
+  value: ""
+  existingSecret: ""
+
+oidc:
+  issuer: ""
+  clientId: ""
+  clientSecret: ""
+  redirectUrl: ""
+  required: false
+  adminGroup: ""
+
+ingress:
+  enabled: false
+  className: ""
+  host: tessera.example.com
+  tls: false
+
+postgresql:
+  enabled: false
+  auth:
+    username: tessera
+    password: ""
+    database: tessera
+  image: postgres:16

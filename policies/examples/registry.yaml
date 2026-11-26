@@ -1,0 +1,15 @@
+apiVersion: tessera/v1
+kind: AgentRegistry
+baselines:
+  - prod-baseline.yaml
+agents:
+  - name: quickstart
+    environment: dev
+    owner: dev@localhost
+    status: active
+    policy: quickstart.yaml
+  - name: support-triage
+    environment: prod
+    owner: team-support@acme.com
+    status: active
+    policy: support-triage.yaml

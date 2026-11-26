@@ -1,0 +1,6352 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Agent Tessera",
+    "version": "0.8.0"
+  },
+  "paths": {
+    "/.well-known/jwks.json": {
+      "get": {
+        "summary": "Jwks",
+        "description": "List signing keys that are active or not yet retired.\n\nArgs:\n    request: Current request. The app state holds the session factory.\n\nReturns:\n    A JWKS document.",
+        "operationId": "jwks__well_known_jwks_json_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Jwks  Well Known Jwks Json Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oidc/start": {
+      "get": {
+        "summary": " Start",
+        "description": "Redirect the browser to the identity provider.\n\nArgs:\n    request: Current HTTP request.\n\nReturns:\n    A redirect that stores the OAuth state in a cookie.\n\nRaises:\n    ApiError: Status 404 when SSO is not configured, or 401 when discovery\n        fails.",
+        "operationId": "_start_oidc_start_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oidc/callback": {
+      "get": {
+        "summary": " Callback",
+        "description": "Finish SSO and start a server-side session for `oidc:<sub>`.\n\nArgs:\n    request: Current HTTP request. The state cookie must match `state`.\n    code: Authorization code.\n    state: State value returned by the provider.\n\nReturns:\n    A redirect to `/app/overview` with the opaque session cookie.\n\nRaises:\n    ApiError: Status 404 when SSO is not configured, or 401 when the\n        state or token is not acceptable.",
+        "operationId": "_callback_oidc_callback_get",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Code"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "State"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ui/oidc/start": {
+      "get": {
+        "summary": " Redirect Start",
+        "description": "Redirect legacy `/ui/oidc/start` to `/oidc/start`.\n\nArgs:\n    request: Current HTTP request.\n\nReturns:\n    A 303 redirect preserving the query string.",
+        "operationId": "_redirect_start_ui_oidc_start_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ui/oidc/callback": {
+      "get": {
+        "summary": " Redirect Callback",
+        "description": "Redirect legacy `/ui/oidc/callback` to `/oidc/callback`.\n\nArgs:\n    request: Current HTTP request.\n\nReturns:\n    A 303 redirect preserving the query string.",
+        "operationId": "_redirect_callback_ui_oidc_callback_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Return the authenticated admin",
+        "description": "Return who the caller is authenticated as.\n\nAccepts a bearer admin key or a UI session cookie. Development\nloopback without a credential reports `method` `dev`.\n\nArgs:\n    request: Current HTTP request.\n\nReturns:\n    `actor`, `method` (`key`, `oidc`, or `dev`), and `admin_key_id`\n    (null for SSO and development loopback). Cookie sessions also\n    include `csrf` for console mutating calls. When\n    `TESSERA_SERVER_TRACE_URL` is set, the response includes\n    `trace_url` (a template with `{trace_id}` / `{span_id}`).",
+        "operationId": "read_me_v1_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Read Me V1 Me Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/owners": {
+      "post": {
+        "tags": [
+          "owners"
+        ],
+        "summary": "Create an owner",
+        "description": "Create an owner.\n\nArgs:\n    body: Owner fields.\n    admin: Authenticated admin key, if one was presented.\n    session: Database session.\n\nReturns:\n    The owner document.",
+        "operationId": "post_owner_v1_owners_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_OwnerBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Post Owner V1 Owners Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "owners"
+        ],
+        "summary": "List owners",
+        "description": "List owners.\n\nArgs:\n    limit: Page size.\n    cursor: Id of the last owner already seen.\n    email: Exact email address to match.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    A page of owners.",
+        "operationId": "get_owners_v1_owners_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Email"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Owners V1 Owners Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/owners/{owner_id}": {
+      "patch": {
+        "tags": [
+          "owners"
+        ],
+        "summary": "Update an owner",
+        "description": "Change an owner's name or active flag.\n\nArgs:\n    owner_id: Owner to update.\n    body: Fields to change.\n    admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The updated owner.",
+        "operationId": "patch_owner_v1_owners__owner_id__patch",
+        "parameters": [
+          {
+            "name": "owner_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Owner Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_OwnerPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Patch Owner V1 Owners  Owner Id  Patch"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agents": {
+      "post": {
+        "tags": [
+          "agents"
+        ],
+        "summary": "Register an agent",
+        "description": "Register an agent.\n\nArgs:\n    body: Agent fields.\n    admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The agent document, with status `draft`.",
+        "operationId": "post_agent_v1_agents_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_AgentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Post Agent V1 Agents Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "agents"
+        ],
+        "summary": "List agents",
+        "description": "List agents.\n\nArgs:\n    environment: Filter by environment.\n    status: Filter by lifecycle status.\n    owner_id: Filter by owner.\n    orphaned: Filter by an inactive owner.\n    limit: Page size.\n    cursor: Id of the last agent already seen.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    A page of agents.",
+        "operationId": "get_agents_v1_agents_get",
+        "parameters": [
+          {
+            "name": "environment",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Environment"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "owner_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Owner Id"
+            }
+          },
+          {
+            "name": "orphaned",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Orphaned"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Agents V1 Agents Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent_id}": {
+      "get": {
+        "tags": [
+          "agents"
+        ],
+        "summary": "Get one agent",
+        "description": "Return one agent.\n\nArgs:\n    agent_id: Agent to load.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The agent, its orphaned flag, policy version, and recent instances.",
+        "operationId": "get_one_agent_v1_agents__agent_id__get",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Agent Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get One Agent V1 Agents  Agent Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "agents"
+        ],
+        "summary": "Update an agent",
+        "description": "Change agent metadata.\n\nArgs:\n    agent_id: Agent to update.\n    body: Fields to change.\n    admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The updated agent.",
+        "operationId": "patch_agent_v1_agents__agent_id__patch",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Agent Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_AgentPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Patch Agent V1 Agents  Agent Id  Patch"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent_id}:activate": {
+      "post": {
+        "tags": [
+          "agents"
+        ],
+        "summary": "Activate an agent",
+        "description": "Activate an agent.\n\nArgs:\n    agent_id: Agent to activate.\n    body: Optional JSON with an operator `reason` (max 500 chars).\n    admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The updated agent.",
+        "operationId": "activate_v1_agents__agent_id__activate_post",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Agent Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_ReasonBody",
+                "default": {}
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Activate V1 Agents  Agent Id  Activate Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent_id}:suspend": {
+      "post": {
+        "tags": [
+          "agents"
+        ],
+        "summary": "Suspend an agent",
+        "description": "Suspend an agent.\n\nArgs:\n    agent_id: Agent to suspend.\n    body: Optional JSON with an operator `reason` (max 500 chars).\n    admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The updated agent.",
+        "operationId": "suspend_v1_agents__agent_id__suspend_post",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Agent Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_ReasonBody",
+                "default": {}
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Suspend V1 Agents  Agent Id  Suspend Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent_id}:retire": {
+      "post": {
+        "tags": [
+          "agents"
+        ],
+        "summary": "Retire an agent",
+        "description": "Retire an agent.\n\nArgs:\n    agent_id: Agent to retire.\n    body: Optional JSON with an operator `reason` (max 500 chars).\n    admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The updated agent.",
+        "operationId": "retire_v1_agents__agent_id__retire_post",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Agent Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_ReasonBody",
+                "default": {}
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Retire V1 Agents  Agent Id  Retire Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent_id}/registration-tokens": {
+      "post": {
+        "tags": [
+          "agents"
+        ],
+        "summary": "Create a registration token",
+        "description": "Create a registration token.\n\nArgs:\n    agent_id: Agent the token registers.\n    body: Reuse and expiry options.\n    admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The token id and the full token, shown once.",
+        "operationId": "post_token_v1_agents__agent_id__registration_tokens_post",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Agent Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/tessera_server__api__registry___TokenBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Post Token V1 Agents  Agent Id  Registration Tokens Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/instances/{instance_id}:revoke": {
+      "post": {
+        "tags": [
+          "agents"
+        ],
+        "summary": "Revoke an instance",
+        "description": "Revoke an instance.\n\nArgs:\n    instance_id: Instance to revoke.\n    body: Optional JSON with an operator `reason` (max 500 chars).\n    admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The revocation row.",
+        "operationId": "post_revoke_v1_instances__instance_id__revoke_post",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Instance Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_ReasonBody",
+                "default": {}
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Post Revoke V1 Instances  Instance Id  Revoke Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent_id}/policy": {
+      "put": {
+        "tags": [
+          "policies"
+        ],
+        "summary": "Put Policy",
+        "description": "Replace an agent's policy.\n\nArgs:\n    agent_id: Agent the document belongs to.\n    request: Request whose body is YAML.\n    admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The effective policy version.",
+        "operationId": "put_policy_v1_agents__agent_id__policy_put",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Agent Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Put Policy V1 Agents  Agent Id  Policy Put"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "policies"
+        ],
+        "summary": "Read Policy",
+        "description": "Return an agent's policy YAML.\n\nArgs:\n    agent_id: Agent to read.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The stored YAML document.",
+        "operationId": "read_policy_v1_agents__agent_id__policy_get",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Agent Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/baselines/{name}": {
+      "put": {
+        "tags": [
+          "policies"
+        ],
+        "summary": "Put One Baseline",
+        "description": "Replace a baseline.\n\nArgs:\n    name: Baseline name.\n    request: Request whose body is YAML.\n    admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The stored YAML document.",
+        "operationId": "put_one_baseline_v1_baselines__name__put",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "policies"
+        ],
+        "summary": "Read Baseline",
+        "description": "Return a baseline's YAML.\n\nArgs:\n    name: Baseline name.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The stored YAML document.",
+        "operationId": "read_baseline_v1_baselines__name__get",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "policies"
+        ],
+        "summary": "Remove Baseline",
+        "description": "Delete a baseline.\n\nArgs:\n    name: Baseline name.\n    admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    An empty response.",
+        "operationId": "remove_baseline_v1_baselines__name__delete",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/baselines": {
+      "get": {
+        "tags": [
+          "policies"
+        ],
+        "summary": "Read Baselines",
+        "description": "List baselines.\n\nArgs:\n    limit: Page size.\n    cursor: Name of the last baseline already seen.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    A page of baseline names.",
+        "operationId": "read_baselines_v1_baselines_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Read Baselines V1 Baselines Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/baselines/{name}/agents": {
+      "get": {
+        "tags": [
+          "policies"
+        ],
+        "summary": "Read Baseline Agents",
+        "description": "List agents that inherit a baseline via its selector.\n\nArgs:\n    name: Baseline name.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    Matching agents.",
+        "operationId": "read_baseline_agents_v1_baselines__name__agents_get",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Read Baseline Agents V1 Baselines  Name  Agents Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/baselines/{name}:validate": {
+      "post": {
+        "tags": [
+          "policies"
+        ],
+        "summary": "Validate One Baseline",
+        "description": "Validate baseline YAML without writing.\n\nArgs:\n    name: Baseline name.\n    request: Request whose body is YAML.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    Validation result with digest.",
+        "operationId": "validate_one_baseline_v1_baselines__name__validate_post",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Validate One Baseline V1 Baselines  Name  Validate Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/baselines/{name}:dry-run": {
+      "post": {
+        "tags": [
+          "policies"
+        ],
+        "summary": "Dry Run One Baseline",
+        "description": "Preview baseline replace impact without writing.\n\nArgs:\n    name: Baseline name.\n    request: Request whose body is YAML.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    Matching count and per-agent impact rows.",
+        "operationId": "dry_run_one_baseline_v1_baselines__name__dry_run_post",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Dry Run One Baseline V1 Baselines  Name  Dry Run Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/bundles/{agent_id}": {
+      "get": {
+        "tags": [
+          "policies"
+        ],
+        "summary": "Read Bundle",
+        "description": "Return the agent's signed policy bundle.\n\nArgs:\n    agent_id: Agent the bundle is for.\n    request: Request carrying an admin key or that agent's runtime JWT.\n    session: Database session.\n\nReturns:\n    A JWT, or 304 when `If-None-Match` is the current version.",
+        "operationId": "read_bundle_v1_bundles__agent_id__get",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Agent Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events": {
+      "post": {
+        "tags": [
+          "events"
+        ],
+        "summary": "Post Events",
+        "description": "Store a batch of events from an agent instance.\n\nArgs:\n    request: Request whose body is `{\"events\": [...]}` and whose\n        bearer token is a runtime JWT.\n    session: Database session.\n\nReturns:\n    How many events were new and how many were duplicates.",
+        "operationId": "post_events_v1_events_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "integer"
+                  },
+                  "title": "Response Post Events V1 Events Post"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "events",
+          "events"
+        ],
+        "summary": "Query ingested events",
+        "description": "Query indexed events for the console explorer.",
+        "operationId": "read_events_v1_events_get",
+        "parameters": [
+          {
+            "name": "agent",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Agent"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Type"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kind"
+            }
+          },
+          {
+            "name": "effect",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Effect"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "resource",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Resource"
+            }
+          },
+          {
+            "name": "rule",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rule"
+            }
+          },
+          {
+            "name": "run",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run"
+            }
+          },
+          {
+            "name": "span",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Span"
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Since"
+            }
+          },
+          {
+            "name": "until",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Until"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Read Events V1 Events Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/audit": {
+      "get": {
+        "tags": [
+          "events"
+        ],
+        "summary": "Read Audit",
+        "description": "List ingested events.\n\nArgs:\n    agent_id: Filter by agent.\n    event_type: Filter by event type.\n    task: Filter by task id.\n    since: Include events at or after this timestamp.\n    limit: Page size.\n    cursor: Id of the last event already seen.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    A page of events.",
+        "operationId": "read_audit_v1_audit_get",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Agent Id"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Type"
+            }
+          },
+          {
+            "name": "task",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Task"
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Since"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Read Audit V1 Audit Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/audit/log": {
+      "get": {
+        "tags": [
+          "events"
+        ],
+        "summary": "Read Log",
+        "description": "List the server audit chain.\n\nArgs:\n    limit: Page size.\n    cursor: Sequence number of the last row already seen.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    A page of audit rows.",
+        "operationId": "read_log_v1_audit_log_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Read Log V1 Audit Log Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/audit/verify": {
+      "get": {
+        "tags": [
+          "events"
+        ],
+        "summary": "Read Verify",
+        "description": "Recompute the server audit chain.\n\nArgs:\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    Whether the chain is intact, and the first problem when it is not.",
+        "operationId": "read_verify_v1_audit_verify_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Read Verify V1 Audit Verify Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/facets": {
+      "get": {
+        "tags": [
+          "events",
+          "events"
+        ],
+        "summary": "Facet counts for event filters",
+        "description": "Return top facet values with counts for the current filters.",
+        "operationId": "read_event_facets_v1_events_facets_get",
+        "parameters": [
+          {
+            "name": "agent",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Agent"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Type"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kind"
+            }
+          },
+          {
+            "name": "effect",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Effect"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "resource",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Resource"
+            }
+          },
+          {
+            "name": "rule",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rule"
+            }
+          },
+          {
+            "name": "run",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run"
+            }
+          },
+          {
+            "name": "span",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Span"
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Since"
+            }
+          },
+          {
+            "name": "until",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Until"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Read Event Facets V1 Events Facets Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/histogram": {
+      "get": {
+        "tags": [
+          "events",
+          "events"
+        ],
+        "summary": "Event counts by time bucket",
+        "description": "Return stacked histogram counts for the current filters.",
+        "operationId": "read_event_histogram_v1_events_histogram_get",
+        "parameters": [
+          {
+            "name": "agent",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Agent"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Type"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kind"
+            }
+          },
+          {
+            "name": "effect",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Effect"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "resource",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Resource"
+            }
+          },
+          {
+            "name": "rule",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rule"
+            }
+          },
+          {
+            "name": "run",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run"
+            }
+          },
+          {
+            "name": "span",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Span"
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Since"
+            }
+          },
+          {
+            "name": "until",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Until"
+            }
+          },
+          {
+            "name": "buckets",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 10,
+              "default": 60,
+              "title": "Buckets"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Read Event Histogram V1 Events Histogram Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/stream": {
+      "get": {
+        "tags": [
+          "events",
+          "events"
+        ],
+        "summary": "Live event stream (SSE)",
+        "description": "Stream matching events as server-sent events.",
+        "operationId": "stream_events_v1_events_stream_get",
+        "parameters": [
+          {
+            "name": "agent",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Agent"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Type"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kind"
+            }
+          },
+          {
+            "name": "effect",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Effect"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "resource",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Resource"
+            }
+          },
+          {
+            "name": "rule",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rule"
+            }
+          },
+          {
+            "name": "run",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run"
+            }
+          },
+          {
+            "name": "span",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Span"
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Since"
+            }
+          },
+          {
+            "name": "until",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Until"
+            }
+          },
+          {
+            "name": "Last-Event-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Last-Event-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/footprint": {
+      "get": {
+        "tags": [
+          "footprint"
+        ],
+        "summary": "Read Footprint",
+        "description": "Total tokens, cost, calls, and denials.\n\nArgs:\n    agent_id: Agent to total. Omit it to include every agent.\n    start: Include events at or after this ISO-8601 time.\n    end: Include events at or before this ISO-8601 time.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    `tokens_in`, `tokens_out`, `cost_usd`, `model_calls`,\n    `tool_calls`, and `denials`.",
+        "operationId": "read_footprint_v1_footprint_get",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Agent Id"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "From"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "To"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Read Footprint V1 Footprint Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent_id}/footprint/access": {
+      "get": {
+        "tags": [
+          "footprint"
+        ],
+        "summary": "Read Access",
+        "description": "Compare declared grants with what the agent used.\n\nArgs:\n    agent_id: Agent to report.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    Declared, observed, unused, and denied resources for 30 days.",
+        "operationId": "read_access_v1_agents__agent_id__footprint_access_get",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Agent Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Read Access V1 Agents  Agent Id  Footprint Access Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/runs": {
+      "get": {
+        "tags": [
+          "runs"
+        ],
+        "summary": "Read Runs",
+        "description": "List runs.\n\nArgs:\n    limit: Page size.\n    cursor: Id of the last run already seen.\n    status: Exact status filter.\n    agent: Agent id filter.\n    environment: Exact agent environment filter.\n    since: ISO-8601 or relative lower bound on `first_seen_at`.\n    until: ISO-8601 or relative upper bound.\n    has_denials: Require or exclude deny events.\n    has_errors: Require or exclude error-status events.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    A page of runs with span/denial/error/approval counts.",
+        "operationId": "read_runs_v1_runs_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "agent",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Agent"
+            }
+          },
+          {
+            "name": "environment",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Environment"
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Since"
+            }
+          },
+          {
+            "name": "until",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Until"
+            }
+          },
+          {
+            "name": "has_denials",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Has Denials"
+            }
+          },
+          {
+            "name": "has_errors",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Has Errors"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Read Runs V1 Runs Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/runs/{run_id}": {
+      "get": {
+        "tags": [
+          "runs"
+        ],
+        "summary": "Read Run",
+        "description": "Return one run.\n\nArgs:\n    run_id: Run to read.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The run, its participants, and how many events name it.",
+        "operationId": "read_run_v1_runs__run_id__get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Read Run V1 Runs  Run Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/runs/{run_id}/trace": {
+      "get": {
+        "tags": [
+          "runs"
+        ],
+        "summary": "Governance trace for a run",
+        "description": "Return the span tree for a run.\n\nArgs:\n    run_id: Run to inspect.\n    _admin: Authenticated admin.\n    session: Database session.\n\nReturns:\n    Trace document with spans and unparented events.",
+        "operationId": "read_run_trace_v1_runs__run_id__trace_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Read Run Trace V1 Runs  Run Id  Trace Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/runs/{run_id}:revoke": {
+      "post": {
+        "tags": [
+          "runs"
+        ],
+        "summary": "Post Revoke",
+        "description": "Revoke a run.\n\nArgs:\n    run_id: Run to revoke.\n    body: Optional JSON with an operator `reason` (max 500 chars).\n    admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The revoked run.",
+        "operationId": "post_revoke_v1_runs__run_id__revoke_post",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevokeRunBody",
+                "default": {}
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Post Revoke V1 Runs  Run Id  Revoke Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/revocations": {
+      "get": {
+        "tags": [
+          "runs"
+        ],
+        "summary": "List recent revocations",
+        "description": "List revocations newest first for operators.\n\nArgs:\n    limit: Page size.\n    cursor: Id of the last row already seen (newer pages use lower ids).\n    kind: Exact kind filter.\n    agent_id: Limit to one agent.\n    _admin: Authenticated admin key or session.\n    session: Database session.\n\nReturns:\n    A page of `{id, kind, agent_id, subject, created_at}` rows.",
+        "operationId": "read_revocations_v1_revocations_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kind"
+            }
+          },
+          {
+            "name": "agent_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Agent Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Read Revocations V1 Revocations Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/revocations/stream": {
+      "get": {
+        "tags": [
+          "runs"
+        ],
+        "summary": "Stream",
+        "description": "Stream revocation events for the calling instance.\n\nArgs:\n    request: Request whose bearer token is a runtime JWT. `Last-Event-ID`\n        resumes the stream.\n\nReturns:\n    A `text/event-stream` response.",
+        "operationId": "stream_v1_revocations_stream_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/search": {
+      "get": {
+        "tags": [
+          "search"
+        ],
+        "summary": "Search agents and governance entities",
+        "description": "Search agents, runs, approvals, spans, resources, and rules.\n\nArgs:\n    q: Free-text query (min 2 characters).\n    limit: Max hits per type (1-20, default 8).\n    _admin: Authenticated admin.\n    session: Database session.\n\nReturns:\n    `results` for the command palette. Never searches payloads.",
+        "operationId": "read_search_v1_search_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Q"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 20,
+              "minimum": 1,
+              "default": 8,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Read Search V1 Search Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/posture": {
+      "get": {
+        "tags": [
+          "posture"
+        ],
+        "summary": "Posture board",
+        "description": "Return posture for every non-retired agent.",
+        "operationId": "read_posture_board_v1_posture_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Read Posture Board V1 Posture Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent_id}/instances": {
+      "get": {
+        "tags": [
+          "agents"
+        ],
+        "summary": "List instances for an agent",
+        "description": "List instances for one agent.",
+        "operationId": "read_instances_v1_agents__agent_id__instances_get",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Agent Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Read Instances V1 Agents  Agent Id  Instances Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent_id}/policy:validate": {
+      "post": {
+        "tags": [
+          "policies"
+        ],
+        "summary": "Validate policy YAML without saving",
+        "description": "Validate draft YAML and diff it against the stored policy.",
+        "operationId": "validate_policy_v1_agents__agent_id__policy_validate_post",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Agent Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Validate Policy V1 Agents  Agent Id  Policy Validate Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent_id}/policy:dry-run": {
+      "post": {
+        "tags": [
+          "policies"
+        ],
+        "summary": "Evaluate one action against the stored policy",
+        "description": "Evaluate one action against the agent's effective policy.",
+        "operationId": "dry_run_policy_v1_agents__agent_id__policy_dry_run_post",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Agent Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DryRunBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Dry Run Policy V1 Agents  Agent Id  Policy Dry Run Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent_id}/policy:from-template": {
+      "post": {
+        "tags": [
+          "policies"
+        ],
+        "summary": "Apply a built-in policy template",
+        "description": "Apply a built-in template as the agent's policy.",
+        "operationId": "from_template_v1_agents__agent_id__policy_from_template_post",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Agent Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FromTemplateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response From Template V1 Agents  Agent Id  Policy From Template Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/admin-keys": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "List admin keys",
+        "description": "List admin keys (secrets never included).",
+        "operationId": "read_admin_keys_v1_admin_keys_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Read Admin Keys V1 Admin Keys Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Create an admin key",
+        "description": "Create an admin key; the secret is returned once.",
+        "operationId": "post_admin_key_v1_admin_keys_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminKeyCreateBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Post Admin Key V1 Admin Keys Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/admin-keys/{key_id}:revoke": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Revoke an admin key",
+        "description": "Revoke an admin key and end its sessions.",
+        "operationId": "post_revoke_admin_key_v1_admin_keys__key_id__revoke_post",
+        "parameters": [
+          {
+            "name": "key_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Key Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Post Revoke Admin Key V1 Admin Keys  Key Id  Revoke Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/webhooks/{webhook_id}:ping": {
+      "post": {
+        "tags": [
+          "webhooks"
+        ],
+        "summary": "Send a signed webhook.ping",
+        "description": "Deliver one signed ping to the webhook endpoint.",
+        "operationId": "post_webhook_ping_v1_webhooks__webhook_id__ping_post",
+        "parameters": [
+          {
+            "name": "webhook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Webhook Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Post Webhook Ping V1 Webhooks  Webhook Id  Ping Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/policy-templates": {
+      "get": {
+        "tags": [
+          "policies"
+        ],
+        "summary": "List built-in policy templates",
+        "description": "Return built-in onboarding templates.",
+        "operationId": "read_templates_v1_policy_templates_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Read Templates V1 Policy Templates Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/runs/{run_id}/effects": {
+      "get": {
+        "tags": [
+          "runs"
+        ],
+        "summary": "Read Effects",
+        "description": "List the opaque effects recorded for a run.\n\nArgs:\n    run_id: Run to read.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    `items` with `ref`, `reversible`, `undo`, and `agent_id`.",
+        "operationId": "read_effects_v1_runs__run_id__effects_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Read Effects V1 Runs  Run Id  Effects Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/token": {
+      "post": {
+        "tags": [
+          "token"
+        ],
+        "summary": "Post Token",
+        "description": "Exchange a registration token, a runtime JWT, a dev grant, or a workload assertion.\n\nArgs:\n    body: Grant and, for registration or dev, the instance description.\n    request: Current request. Refresh reads the bearer token. The dev\n        grant also reads the client address.\n    session: Database session.\n\nReturns:\n    The access token and the agent it represents.",
+        "operationId": "post_token_v1_token_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/tessera_server__api__token___TokenBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Post Token V1 Token Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/quotas": {
+      "get": {
+        "tags": [
+          "quotas"
+        ],
+        "summary": "Quota usage vs ceilings",
+        "description": "Return current usage vs ceilings for matching agents.\n\nArgs:\n    environment: Optional exact environment filter.\n    agent_id: Optional single agent filter.\n    _admin: Authenticated admin key or session.\n    session: Database session.\n\nReturns:\n    `{items: [...]}` of quota snapshot rows.",
+        "operationId": "read_quotas_v1_quotas_get",
+        "parameters": [
+          {
+            "name": "environment",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Environment"
+            }
+          },
+          {
+            "name": "agent_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Agent Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Read Quotas V1 Quotas Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/quotas/leases": {
+      "post": {
+        "tags": [
+          "quotas"
+        ],
+        "summary": "Post Lease",
+        "description": "Close the previous lease and grant the next slice of a budget.\n\nArgs:\n    body: Previous lease, the units consumed under it, and the quota\n        to draw from.\n    request: Request whose bearer token is a runtime JWT.\n    session: Database session.\n\nReturns:\n    The new lease, or an empty grant when the budget is exhausted,\n    the quota is not leased on the server, or the policy sets no\n    daily token limit.",
+        "operationId": "post_lease_v1_quotas_leases_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_LeaseBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Post Lease V1 Quotas Leases Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/approvals": {
+      "post": {
+        "tags": [
+          "approvals"
+        ],
+        "summary": "Post Approval",
+        "description": "Create an approval from an agent instance.\n\nArgs:\n    body: Action, decision, and optional run and principal.\n    request: Request whose bearer token is a runtime JWT.\n    session: Database session.\n\nReturns:\n    The new id, status, and expiry.",
+        "operationId": "post_approval_v1_approvals_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/tessera_server__api__approvals___CreateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Post Approval V1 Approvals Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "approvals"
+        ],
+        "summary": "Read Approvals",
+        "description": "List approvals.\n\nArgs:\n    status: Keep only this status.\n    agent_id: Keep only this agent.\n    limit: Page size.\n    cursor: Id of the last approval already seen.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    A page of approvals, newest first, and `next_cursor`.",
+        "operationId": "read_approvals_v1_approvals_get",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "agent_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Agent Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Read Approvals V1 Approvals Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/approvals/{approval_id}": {
+      "get": {
+        "tags": [
+          "approvals"
+        ],
+        "summary": "Read Approval",
+        "description": "Return one approval to its agent or to an admin.\n\nArgs:\n    approval_id: Approval to read.\n    request: Bearer admin/runtime credential, or an admin session cookie.\n    session: Database session.\n\nReturns:\n    The approval document.",
+        "operationId": "read_approval_v1_approvals__approval_id__get",
+        "parameters": [
+          {
+            "name": "approval_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Approval Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Read Approval V1 Approvals  Approval Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/approvals/{approval_id}:approve": {
+      "post": {
+        "tags": [
+          "approvals"
+        ],
+        "summary": "Post Approve",
+        "description": "Approve a pending request.\n\nArgs:\n    approval_id: Approval to approve.\n    request: Bearer admin/runtime credential, or an admin session cookie.\n        The body may be empty or `{\"comment\": \"...\"}`.\n    session: Database session.\n\nReturns:\n    The updated approval.",
+        "operationId": "post_approve_v1_approvals__approval_id__approve_post",
+        "parameters": [
+          {
+            "name": "approval_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Approval Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Post Approve V1 Approvals  Approval Id  Approve Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/approvals/{approval_id}:deny": {
+      "post": {
+        "tags": [
+          "approvals"
+        ],
+        "summary": "Post Deny",
+        "description": "Deny a pending request.\n\nArgs:\n    approval_id: Approval to deny.\n    request: Bearer admin/runtime credential, or an admin session cookie.\n        The body may be empty or `{\"comment\": \"...\"}`.\n    session: Database session.\n\nReturns:\n    The updated approval.",
+        "operationId": "post_deny_v1_approvals__approval_id__deny_post",
+        "parameters": [
+          {
+            "name": "approval_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Approval Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Post Deny V1 Approvals  Approval Id  Deny Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/webhooks": {
+      "get": {
+        "tags": [
+          "webhooks"
+        ],
+        "summary": "Read Webhooks",
+        "description": "List webhook endpoints.\n\nArgs:\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    Every stored endpoint, oldest first.",
+        "operationId": "read_webhooks_v1_webhooks_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Read Webhooks V1 Webhooks Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "webhooks"
+        ],
+        "summary": "Post Webhook",
+        "description": "Store a webhook endpoint.\n\nArgs:\n    body: URL, event names, optional secret, and active flag.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The endpoint. The secret is not echoed.",
+        "operationId": "post_webhook_v1_webhooks_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/tessera_server__api__webhooks___CreateBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Post Webhook V1 Webhooks Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/webhooks/{webhook_id}": {
+      "get": {
+        "tags": [
+          "webhooks"
+        ],
+        "summary": "Read Webhook",
+        "description": "Return one webhook endpoint.\n\nArgs:\n    webhook_id: Endpoint to read.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The endpoint document.",
+        "operationId": "read_webhook_v1_webhooks__webhook_id__get",
+        "parameters": [
+          {
+            "name": "webhook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Webhook Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Read Webhook V1 Webhooks  Webhook Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "webhooks"
+        ],
+        "summary": "Put Webhook",
+        "description": "Change a webhook endpoint.\n\nArgs:\n    webhook_id: Endpoint to change.\n    body: Fields to replace. Omitted fields stay as they are.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The updated endpoint.",
+        "operationId": "put_webhook_v1_webhooks__webhook_id__put",
+        "parameters": [
+          {
+            "name": "webhook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Webhook Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/tessera_server__api__webhooks___UpdateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Put Webhook V1 Webhooks  Webhook Id  Put"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "webhooks"
+        ],
+        "summary": "Remove Webhook",
+        "description": "Delete a webhook endpoint.\n\nArgs:\n    webhook_id: Endpoint to delete.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The deleted id.",
+        "operationId": "remove_webhook_v1_webhooks__webhook_id__delete",
+        "parameters": [
+          {
+            "name": "webhook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Webhook Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Remove Webhook V1 Webhooks  Webhook Id  Delete"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/alerts": {
+      "get": {
+        "tags": [
+          "alerts"
+        ],
+        "summary": "Read Alerts",
+        "description": "List alert rules.\n\nArgs:\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    Every stored rule, oldest first.",
+        "operationId": "read_alerts_v1_alerts_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Read Alerts V1 Alerts Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "alerts"
+        ],
+        "summary": "Post Alert",
+        "description": "Store an alert rule.\n\nArgs:\n    body: Name, metric, threshold, window, selector, and action.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The stored rule.",
+        "operationId": "post_alert_v1_alerts_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/tessera_server__api__alerts___CreateBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Post Alert V1 Alerts Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/alerts/{alert_id}": {
+      "delete": {
+        "tags": [
+          "alerts"
+        ],
+        "summary": "Remove Alert",
+        "description": "Delete an alert rule.\n\nArgs:\n    alert_id: Rule to delete.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The deleted id.",
+        "operationId": "remove_alert_v1_alerts__alert_id__delete",
+        "parameters": [
+          {
+            "name": "alert_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Alert Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Remove Alert V1 Alerts  Alert Id  Delete"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/supervisors/{supervisor_id}/grants": {
+      "put": {
+        "tags": [
+          "supervisors"
+        ],
+        "summary": "Put Grants",
+        "description": "Replace one supervisor's allow lists.\n\nArgs:\n    supervisor_id: `user:` or `group:` id.\n    request: Request whose body is YAML.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The supervisor id that was stored.",
+        "operationId": "put_grants_v1_supervisors__supervisor_id__grants_put",
+        "parameters": [
+          {
+            "name": "supervisor_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Supervisor Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Put Grants V1 Supervisors  Supervisor Id  Grants Put"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "supervisors"
+        ],
+        "summary": "Read Grants",
+        "description": "Return one supervisor's grant YAML.\n\nArgs:\n    supervisor_id: `user:` or `group:` id.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The stored YAML document.",
+        "operationId": "read_grants_v1_supervisors__supervisor_id__grants_get",
+        "parameters": [
+          {
+            "name": "supervisor_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Supervisor Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent_id}/supervisor-ack": {
+      "post": {
+        "tags": [
+          "supervisors"
+        ],
+        "summary": "Ack Agent",
+        "description": "Reset the dead-man timer for one agent.\n\nArgs:\n    agent_id: Agent a supervisor is acknowledging.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The agent id and the acknowledgement time.",
+        "operationId": "ack_agent_v1_agents__agent_id__supervisor_ack_post",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Agent Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Ack Agent V1 Agents  Agent Id  Supervisor Ack Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent_id}/posture": {
+      "get": {
+        "tags": [
+          "posture"
+        ],
+        "summary": "Read Posture",
+        "description": "Return the posture score for one agent.\n\nArgs:\n    agent_id: Agent to score.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    `score`, `coverage`, and `components` for the last seven days.",
+        "operationId": "read_posture_v1_agents__agent_id__posture_get",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Agent Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Read Posture V1 Agents  Agent Id  Posture Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dashboards/summary": {
+      "get": {
+        "tags": [
+          "dashboards"
+        ],
+        "summary": "Read Summary",
+        "description": "Return inventory and the last 24 hours.\n\nArgs:\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    Inventory, orphaned and dormant counts, pending approvals, spend,\n    and denials.",
+        "operationId": "read_summary_v1_dashboards_summary_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Read Summary V1 Dashboards Summary Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dashboards/spend": {
+      "get": {
+        "tags": [
+          "dashboards"
+        ],
+        "summary": "Read Spend",
+        "description": "Sum usage cost by agent or model.\n\nArgs:\n    start: Include events at or after this ISO-8601 time.\n    end: Include events at or before this ISO-8601 time.\n    group_by: `agent` or `model`.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    One cost row per group.",
+        "operationId": "read_spend_v1_dashboards_spend_get",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "From"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "To"
+            }
+          },
+          {
+            "name": "group_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "agent",
+              "title": "Group By"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Read Spend V1 Dashboards Spend Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dashboards/denials": {
+      "get": {
+        "tags": [
+          "dashboards"
+        ],
+        "summary": "Read Denials",
+        "description": "Count denied decisions by agent.\n\nArgs:\n    start: Include events at or after this ISO-8601 time.\n    end: Include events at or before this ISO-8601 time.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The total and one row per agent.",
+        "operationId": "read_denials_v1_dashboards_denials_get",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "From"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "To"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Read Denials V1 Dashboards Denials Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/custody/secrets": {
+      "get": {
+        "tags": [
+          "custody"
+        ],
+        "summary": "Read Secrets",
+        "description": "List stored provider keys.\n\nArgs:\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    Each key's id, name, and provider, ordered by name.",
+        "operationId": "read_secrets_v1_custody_secrets_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Read Secrets V1 Custody Secrets Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "custody"
+        ],
+        "summary": "Post Secret",
+        "description": "Store a provider key.\n\nArgs:\n    body: Name, provider, and plaintext.\n    request: Current request. Its settings hold the encryption key.\n    admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The id, name, and provider. The plaintext is not included.",
+        "operationId": "post_secret_v1_custody_secrets_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/tessera_server__api__custody___CreateBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Post Secret V1 Custody Secrets Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/custody/issue": {
+      "post": {
+        "tags": [
+          "custody"
+        ],
+        "summary": "Post Issue",
+        "description": "Issue one stored key to the calling instance.\n\nArgs:\n    body: Name or provider, and an optional lifetime in seconds.\n    request: Current request. The bearer token is a runtime JWT.\n    session: Database session.\n\nReturns:\n    The provider, plaintext key, and expiry.\n\nRaises:\n    ApiError: Status 401 when the bearer token is missing.",
+        "operationId": "post_issue_v1_custody_issue_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_IssueBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Post Issue V1 Custody Issue Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/custody/secrets/{secret_id}": {
+      "get": {
+        "tags": [
+          "custody"
+        ],
+        "summary": "Read Secret",
+        "description": "Return one stored provider key's public fields.\n\nArgs:\n    secret_id: Row to read.\n    _admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The id, name, and provider.",
+        "operationId": "read_secret_v1_custody_secrets__secret_id__get",
+        "parameters": [
+          {
+            "name": "secret_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Secret Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Read Secret V1 Custody Secrets  Secret Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "custody"
+        ],
+        "summary": "Put Secret",
+        "description": "Replace a stored key's label, provider, or plaintext.\n\nArgs:\n    secret_id: Row to update.\n    body: Fields to replace. Omitted fields stay as they are.\n    request: Current request. Its settings hold the encryption key.\n    admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The id, name, and provider. The plaintext is not included.",
+        "operationId": "put_secret_v1_custody_secrets__secret_id__put",
+        "parameters": [
+          {
+            "name": "secret_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Secret Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/tessera_server__api__custody___UpdateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Put Secret V1 Custody Secrets  Secret Id  Put"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "custody"
+        ],
+        "summary": "Remove Secret",
+        "description": "Delete a stored provider key.\n\nArgs:\n    secret_id: Row to delete.\n    admin: Authenticated admin key.\n    session: Database session.\n\nReturns:\n    The deleted id.",
+        "operationId": "remove_secret_v1_custody_secrets__secret_id__delete",
+        "parameters": [
+          {
+            "name": "secret_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Secret Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Remove Secret V1 Custody Secrets  Secret Id  Delete"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/login": {
+      "get": {
+        "summary": " Login Form",
+        "description": "Show the admin key form and the SSO link when configured.\n\nArgs:\n    request: Current HTTP request.\n\nReturns:\n    The login page.",
+        "operationId": "_login_form_login_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": " Login",
+        "description": "Start a server-side session for a valid admin key.\n\nArgs:\n    request: Current HTTP request.\n    admin_key: Key submitted by the form.\n    next_field: Optional post-login path from the form.\n\nReturns:\n    A redirect with the session cookie, or the login page on failure.",
+        "operationId": "_login_login_post",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Body__login_login_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/logout": {
+      "post": {
+        "summary": " Logout",
+        "description": "End the server-side session and clear the admin cookie.\n\nArgs:\n    request: Current HTTP request.\n\nReturns:\n    A redirect to the login page.",
+        "operationId": "_logout_logout_post",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Body__logout_logout_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ui/login": {
+      "get": {
+        "summary": " Redirect Login Get",
+        "description": "Redirect legacy GET `/ui/login` to `/login`, preserving query string.\n\nArgs:\n    request: Current HTTP request.\n\nReturns:\n    A 303 redirect to `/login`.",
+        "operationId": "_redirect_login_get_ui_login_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": " Redirect Login Post",
+        "description": "Redirect legacy POST `/ui/login` to `/login`, preserving query string.\n\nArgs:\n    request: Current HTTP request.\n\nReturns:\n    A 303 redirect to `/login`.",
+        "operationId": "_redirect_login_post_ui_login_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ui/logout": {
+      "get": {
+        "summary": " Redirect Logout Get",
+        "description": "Redirect legacy GET `/ui/logout` to `/login`.\n\nReturns:\n    A 303 redirect to `/login`.",
+        "operationId": "_redirect_logout_get_ui_logout_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": " Logout",
+        "description": "End the server-side session and clear the admin cookie.\n\nArgs:\n    request: Current HTTP request.\n\nReturns:\n    A redirect to the login page.",
+        "operationId": "_logout_ui_logout_post",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Body__logout_ui_logout_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ui": {
+      "get": {
+        "summary": " Redirect App",
+        "description": "Send classic `/ui` operator URLs to the console overview.\n\nArgs:\n    request: Current HTTP request.\n    path: Remaining path under `/ui` (unused).\n\nReturns:\n    A redirect to `/app/overview`.",
+        "operationId": "_redirect_app_ui_get",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ui/{path}": {
+      "get": {
+        "summary": " Redirect App",
+        "description": "Send classic `/ui` operator URLs to the console overview.\n\nArgs:\n    request: Current HTTP request.\n    path: Remaining path under `/ui` (unused).\n\nReturns:\n    A redirect to `/app/overview`.",
+        "operationId": "_redirect_app_ui__path__get",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/app/{full_path}": {
+      "get": {
+        "summary": "Spa",
+        "description": "Serve `index.html` for console routes, or a not-built page.\n\nArgs:\n    full_path: Remaining path under `/app` (unused; SPA handles it).\n\nReturns:\n    The SPA document or a short HTML notice when the build is missing.",
+        "operationId": "spa_app__full_path__get",
+        "parameters": [
+          {
+            "name": "full_path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Full Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/app/": {
+      "get": {
+        "summary": "Spa",
+        "description": "Serve `index.html` for console routes, or a not-built page.\n\nArgs:\n    full_path: Remaining path under `/app` (unused; SPA handles it).\n\nReturns:\n    The SPA document or a short HTML notice when the build is missing.",
+        "operationId": "spa_app__get",
+        "parameters": [
+          {
+            "name": "full_path",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Full Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/app": {
+      "get": {
+        "summary": "Spa",
+        "description": "Serve `index.html` for console routes, or a not-built page.\n\nArgs:\n    full_path: Remaining path under `/app` (unused; SPA handles it).\n\nReturns:\n    The SPA document or a short HTML notice when the build is missing.",
+        "operationId": "spa_app_get",
+        "parameters": [
+          {
+            "name": "full_path",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Full Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Root",
+        "description": "Send browsers to the React console.\n\nReturns:\n    A redirect to `/app` (the SPA lands on `/app/overview`).",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/healthz": {
+      "get": {
+        "summary": "Healthz",
+        "description": "Report that the process is up.\n\nReturns:\n    Status, package version, and whether development mode is on.",
+        "operationId": "healthz_healthz_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Healthz Healthz Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AdminKeyCreateBody": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "AdminKeyCreateBody",
+        "description": "Body for `POST /v1/admin-keys`."
+      },
+      "Body__login_login_post": {
+        "properties": {
+          "admin_key": {
+            "type": "string",
+            "title": "Admin Key"
+          },
+          "next": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next"
+          }
+        },
+        "type": "object",
+        "required": [
+          "admin_key"
+        ],
+        "title": "Body__login_login_post"
+      },
+      "Body__logout_logout_post": {
+        "properties": {
+          "csrf": {
+            "type": "string",
+            "title": "Csrf",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "Body__logout_logout_post"
+      },
+      "Body__logout_ui_logout_post": {
+        "properties": {
+          "csrf": {
+            "type": "string",
+            "title": "Csrf",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "Body__logout_ui_logout_post"
+      },
+      "DryRunBody": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "model",
+              "tool",
+              "data",
+              "agent"
+            ],
+            "title": "Kind",
+            "default": "tool"
+          },
+          "resource": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Resource"
+          }
+        },
+        "type": "object",
+        "required": [
+          "resource"
+        ],
+        "title": "DryRunBody",
+        "description": "Body for `POST /v1/agents/{id}/policy:dry-run`."
+      },
+      "FromTemplateBody": {
+        "properties": {
+          "template_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Template Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "template_id"
+        ],
+        "title": "FromTemplateBody",
+        "description": "Body for `POST /v1/agents/{id}/policy:from-template`."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "RevokeRunBody": {
+        "properties": {
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "title": "RevokeRunBody",
+        "description": "Body for `POST /v1/runs/{id}:revoke`."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "_AgentBody": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 63,
+            "pattern": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$",
+            "title": "Name"
+          },
+          "environment": {
+            "type": "string",
+            "maxLength": 63,
+            "pattern": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$",
+            "title": "Environment"
+          },
+          "owner_id": {
+            "type": "string",
+            "title": "Owner Id"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "risk_tier": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "title": "Risk Tier",
+            "default": "low"
+          },
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Labels"
+          },
+          "autonomy": {
+            "type": "string",
+            "enum": [
+              "assistive",
+              "interactive",
+              "supervised",
+              "autonomous"
+            ],
+            "title": "Autonomy",
+            "default": "interactive"
+          },
+          "supervisors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Supervisors"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "environment",
+          "owner_id"
+        ],
+        "title": "_AgentBody",
+        "description": "Request body for registering an agent."
+      },
+      "_AgentPatch": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "owner_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Id"
+          },
+          "risk_tier": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "low",
+                  "medium",
+                  "high"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Risk Tier"
+          },
+          "labels": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Labels"
+          },
+          "autonomy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "assistive",
+                  "interactive",
+                  "supervised",
+                  "autonomous"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Autonomy"
+          },
+          "supervisors": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supervisors"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "_AgentPatch",
+        "description": "Request body for changing agent metadata."
+      },
+      "_IssueBody": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider"
+          },
+          "ttl": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ttl"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "_IssueBody",
+        "description": "Body of `POST /v1/custody/issue`."
+      },
+      "_LeaseBody": {
+        "properties": {
+          "lease_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lease Id"
+          },
+          "used": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Used",
+            "default": 0
+          },
+          "metric": {
+            "type": "string",
+            "title": "Metric",
+            "default": "tokens"
+          },
+          "quota_name": {
+            "type": "string",
+            "title": "Quota Name",
+            "default": "tokens_per_day"
+          },
+          "resource": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resource"
+          },
+          "principal": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Principal"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id"
+          },
+          "requested": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "_LeaseBody",
+        "description": "Body of `POST /v1/quotas/leases`.\n\n`metric` and `quota_name` default to the v0.2 daily token lease. `used`\nand `requested` are whole units, except `cost_usd`, which counts\nmillionths of a dollar."
+      },
+      "_OwnerBody": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "user",
+              "team"
+            ],
+            "title": "Type"
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 320,
+            "minLength": 1,
+            "title": "Email"
+          },
+          "display_name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Display Name"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "type",
+          "email",
+          "display_name"
+        ],
+        "title": "_OwnerBody",
+        "description": "Request body for creating an owner."
+      },
+      "_OwnerPatch": {
+        "properties": {
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name"
+          },
+          "active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "_OwnerPatch",
+        "description": "Request body for changing an owner."
+      },
+      "_ReasonBody": {
+        "properties": {
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "_ReasonBody",
+        "description": "Optional operator reason for lifecycle and instance revoke."
+      },
+      "_Selector": {
+        "properties": {
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Labels"
+          },
+          "autonomy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "assistive",
+                  "interactive",
+                  "supervised",
+                  "autonomous"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Autonomy"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "_Selector",
+        "description": "Labels and autonomy a rule applies to."
+      },
+      "tessera_server__api__alerts___CreateBody": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "metric": {
+            "type": "string",
+            "enum": [
+              "tokens_in",
+              "tokens_out",
+              "cost_usd",
+              "model_calls",
+              "tool_calls",
+              "denials"
+            ],
+            "title": "Metric"
+          },
+          "threshold": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Threshold"
+          },
+          "window": {
+            "type": "string",
+            "title": "Window"
+          },
+          "selector": {
+            "$ref": "#/components/schemas/_Selector"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "webhook",
+              "suspend"
+            ],
+            "title": "Action"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "metric",
+          "threshold",
+          "window",
+          "action"
+        ],
+        "title": "_CreateBody",
+        "description": "Body of `POST /v1/alerts`."
+      },
+      "tessera_server__api__approvals___CreateBody": {
+        "properties": {
+          "action": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Action"
+          },
+          "decision": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Decision"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id"
+          },
+          "principal": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 320
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Principal"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "action",
+          "decision"
+        ],
+        "title": "_CreateBody",
+        "description": "Body of `POST /v1/approvals`."
+      },
+      "tessera_server__api__custody___CreateBody": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          },
+          "secret": {
+            "type": "string",
+            "title": "Secret"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "provider",
+          "secret"
+        ],
+        "title": "_CreateBody",
+        "description": "Body of `POST /v1/custody/secrets`."
+      },
+      "tessera_server__api__custody___UpdateBody": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider"
+          },
+          "secret": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Secret"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "_UpdateBody",
+        "description": "Body of `PUT /v1/custody/secrets/{id}`."
+      },
+      "tessera_server__api__registry___TokenBody": {
+        "properties": {
+          "reusable": {
+            "type": "boolean",
+            "title": "Reusable",
+            "default": false
+          },
+          "expires_in": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires In"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "_TokenBody",
+        "description": "Request body for creating a registration token."
+      },
+      "tessera_server__api__token___TokenBody": {
+        "properties": {
+          "grant_type": {
+            "type": "string",
+            "enum": [
+              "registration",
+              "refresh",
+              "dev",
+              "workload",
+              "token-exchange",
+              "urn:ietf:params:oauth:grant-type:token-exchange"
+            ],
+            "title": "Grant Type"
+          },
+          "registration_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Registration Token"
+          },
+          "assertion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assertion"
+          },
+          "subject_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Token"
+          },
+          "actor_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actor Token"
+          },
+          "instance_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{32}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instance Id"
+          },
+          "host": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Host"
+          },
+          "runtime": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Runtime"
+          },
+          "agent": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent"
+          },
+          "environment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Environment"
+          },
+          "bound_supervisor": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bound Supervisor"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "grant_type"
+        ],
+        "title": "_TokenBody",
+        "description": "Body of `POST /v1/token`. The grant selects which fields are required."
+      },
+      "tessera_server__api__webhooks___CreateBody": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "events": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Events"
+          },
+          "secret": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Secret"
+          },
+          "active": {
+            "type": "boolean",
+            "title": "Active",
+            "default": true
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "_CreateBody",
+        "description": "Body of `POST /v1/webhooks`."
+      },
+      "tessera_server__api__webhooks___UpdateBody": {
+        "properties": {
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          },
+          "events": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Events"
+          },
+          "secret": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Secret"
+          },
+          "active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active"
+          },
+          "clear_secret": {
+            "type": "boolean",
+            "title": "Clear Secret",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "_UpdateBody",
+        "description": "Body of `PUT /v1/webhooks/{id}`."
+      }
+    }
+  }
+}

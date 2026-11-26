@@ -1,0 +1,13 @@
+node_modules
+dist
+*.local
+.DS_Store
+coverage
+playwright-report
+test-results
+.vite
+e2e/.admin-key
+e2e/.admin-key.*
+e2e/.seed.json
+e2e/.seed.*.json
+e2e/artifacts/

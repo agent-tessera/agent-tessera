@@ -1,0 +1,7 @@
+{
+  "name": "tessera-gpl-fixture",
+  "version": "0.0.0",
+  "private": false,
+  "license": "GPL-3.0",
+  "dependencies": {}
+}

@@ -1,0 +1,7 @@
+apiVersion: tessera/v1
+kind: AgentPolicy
+metadata:
+  agent: demo
+spec:
+  tools:
+    allow: ["files.read"]

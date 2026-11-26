@@ -1,0 +1,23 @@
+apiVersion: tessera/v1
+kind: AgentPolicy
+metadata:
+  agent: chain-worker
+  environment: prod
+  owner: team-support@acme.com
+spec:
+  tools:
+    allow: ["zendesk.read_ticket"]
+  agents:
+    may_invoke: ["billing-agent"]
+    may_be_invoked_by: ["orchestrator", "billing-*"]
+    max_chain_depth: 4
+    allow_reentry: false
+    caller_constraint:
+      - callers: ["orchestrator"]
+        constraint: intersect
+      - callers: ["billing-*"]
+        constraint: own
+  delegation:
+    allow_on_behalf_of: true
+    user_groups: ["support-staff"]
+    principal: required

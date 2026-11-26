@@ -1,0 +1,207 @@
+name: Release
+
+# Publishing uses PyPI trusted publishing (OIDC). No API tokens are stored.
+#
+# * Push a tag like `v0.8.0` to publish to PyPI and create a GitHub Release.
+# * Run this workflow manually (workflow_dispatch) to publish to TestPyPI as a
+#   dry run. Re-running is safe: files that already exist are skipped.
+#
+# Each package publishes from its own GitHub environment. PyPI rejects two
+# pending publishers with the same owner, repository, workflow, and
+# environment, so `agent-tessera` and `agent-tessera-server` need different
+# environment names.
+#
+# One-time setup, on PyPI and TestPyPI, add one pending trusted publisher per
+# row (owner `agent-tessera`, repository `agent-tessera`, workflow `release.yml`):
+#
+#   project                 PyPI env        TestPyPI env
+#   agent-tessera           pypi            testpypi
+#   agent-tessera-server    pypi-server     testpypi-server
+#
+# and create the four environments in the repository settings.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  UV_FROZEN: "1"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Check the tag matches the package versions
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          for file in sdk/src/agent_tessera/__init__.py server/src/tessera_server/__init__.py; do
+            version="$(sed -n 's/^__version__ = "\(.*\)"$/\1/p' "$file")"
+            if [ "$version" != "$tag" ]; then
+              echo "::error::$file has version '$version' but the tag is 'v$tag'"
+              exit 1
+            fi
+          done
+          grep -q "^## \[$tag\]" CHANGELOG.md || {
+            echo "::error::CHANGELOG.md has no section for $tag"
+            exit 1
+          }
+
+      - name: Build the console into the server package
+        working-directory: web
+        run: |
+          npm ci
+          npm run build
+
+      - run: uv build --all-packages -o dist
+      - run: uvx twine check --strict dist/*
+      # W002: the sign-in page and the console each ship the same three fonts.
+      - run: uvx check-wheel-contents --ignore W002 dist/*.whl
+
+      - name: Check the server wheel contains the console
+        run: |
+          python3 - <<'PY'
+          import glob
+          import sys
+          import zipfile
+
+          wheel = glob.glob("dist/agent_tessera_server-*.whl")[0]
+          names = zipfile.ZipFile(wheel).namelist()
+          if not any("tessera_server/web/dist/index.html" in n for n in names):
+              sys.exit("console assets are missing from " + wheel)
+          PY
+
+      - name: Split the distributions by package
+        run: |
+          mkdir -p dist-sdk dist-server
+          mv dist/agent_tessera-* dist-sdk/
+          mv dist/agent_tessera_server-* dist-server/
+          test -n "$(ls dist-sdk)" && test -n "$(ls dist-server)"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-sdk
+          path: dist-sdk/
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-server
+          path: dist-server/
+          if-no-files-found: error
+
+  publish-testpypi-sdk:
+    if: github.event_name == 'workflow_dispatch'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: testpypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist-sdk
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
+
+  publish-testpypi-server:
+    if: github.event_name == 'workflow_dispatch'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: testpypi-server
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist-server
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
+
+  publish-pypi-sdk:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist-sdk
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+
+  publish-pypi-server:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: pypi-server
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist-server
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+
+  github-release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [publish-pypi-sdk, publish-pypi-server]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: dist-*
+          path: dist/
+          merge-multiple: true
+      - name: Extract release notes from the changelog
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          awk -v header="## [$tag]" '
+            index($0, header) == 1 { found = 1; next }
+            found && /^## \[/ { exit }
+            found { print }
+          ' CHANGELOG.md > release-notes.md
+          if [ ! -s release-notes.md ]; then
+            echo "::error::No release notes found for $tag"
+            exit 1
+          fi
+      - name: Create the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          prerelease=""
+          case "$GITHUB_REF_NAME" in *-*) prerelease="--prerelease" ;; esac
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --title "$GITHUB_REF_NAME" \
+            --notes-file release-notes.md \
+            $prerelease

@@ -1,0 +1,18 @@
+apiVersion: tessera/v1
+kind: AgentPolicy
+metadata:
+  agent: AGENT
+  environment: ENV
+  risk_tier: low
+spec:
+  models:
+    allow: ["openai/gpt-4.1-mini", "anthropic/claude-*", "local/*"]
+  tools:
+    allow: ["files.read", "files.list", "search.*"]
+    deny: ["shell.*", "files.write", "files.delete"]
+  data:
+    allow: ["*:read"]
+  limits:
+    max_steps_per_task: 20
+  guardrails:
+    on_missing: warn
