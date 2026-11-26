@@ -1,0 +1,5 @@
+auth:
+  username: tessera
+  password: ""
+  database: tessera
+image: postgres:16

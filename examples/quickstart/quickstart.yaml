@@ -1,0 +1,15 @@
+apiVersion: tessera/v1
+kind: AgentPolicy
+metadata:
+  agent: quickstart
+  environment: dev
+spec:
+  models:
+    allow: ["openai/gpt-4.1-mini", "anthropic/claude-*", "local/*"]
+  tools:
+    allow: ["files.read", "files.list"]
+    require_approval:
+      - files.delete
+    deny: ["shell.*"]
+  limits:
+    max_steps_per_task: 10

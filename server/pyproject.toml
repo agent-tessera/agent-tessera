@@ -1,0 +1,55 @@
+[project]
+name = "agent-tessera-server"
+dynamic = ["version"]
+description = "Control plane server for Agent Tessera."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [{ name = "Agent Tessera contributors" }]
+keywords = ["ai-agents", "governance", "identity", "audit", "policy", "control-plane"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Web Environment",
+    "Framework :: FastAPI",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Security",
+    "Typing :: Typed",
+]
+dependencies = [
+    "agent-tessera==0.8.0",
+    "alembic>=1.13",
+    "fastapi>=0.115",
+    "jinja2>=3.1",
+    "python-multipart>=0.0.9",
+    "sqlalchemy>=2.0.30,<3",
+    "uvicorn>=0.30",
+]
+
+[project.urls]
+Homepage = "https://github.com/agent-tessera/agent-tessera"
+Documentation = "https://github.com/agent-tessera/agent-tessera/tree/main/docs"
+Repository = "https://github.com/agent-tessera/agent-tessera"
+Issues = "https://github.com/agent-tessera/agent-tessera/issues"
+Changelog = "https://github.com/agent-tessera/agent-tessera/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+postgres = [
+    "psycopg[binary]>=3.2",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "src/tessera_server/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tessera_server"]

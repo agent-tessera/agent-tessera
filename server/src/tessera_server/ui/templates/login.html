@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Log in</title>
+    <link rel="stylesheet" href="/ui/static/style.css" />
+  </head>
+  <body class="login">
+    <div class="login-panel">
+      <div class="brand">Tessera<span class="brand-mark">.</span></div>
+      <h1>Admin sign-in</h1>
+      {% if error %}<p role="alert">{{ error }}</p>{% endif %}
+      {% if sso %}
+      <p><a href="/oidc/start{% if next %}?next={{ next|urlencode }}{% endif %}">Sign in with SSO</a></p>
+      {% endif %}
+      {% if key_login %}
+      <form method="post" action="/login{% if next %}?next={{ next|urlencode }}{% endif %}">
+        {% if next %}<input type="hidden" name="next" value="{{ next }}" />{% endif %}
+        <label>Admin key <input name="admin_key" type="password" autocomplete="current-password" /></label>
+        <button type="submit">Log in</button>
+      </form>
+      {% endif %}
+    </div>
+  </body>
+</html>

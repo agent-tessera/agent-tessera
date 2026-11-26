@@ -1,0 +1,15 @@
+apiVersion: tessera/v1
+kind: BaselinePolicy
+metadata:
+  name: prod-baseline
+spec:
+  selector:
+    environment: prod                # also: labels, risk_tier
+  tools:
+    deny: ["shell.*", "fs.delete*"]
+  limits:
+    cost_usd_per_day: 500            # upper bound; agent value is min(agent, baseline)
+  guardrails:
+    required: [input.prompt_injection]
+    on_missing: block
+  require_owner: true

@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "agent-tessera.fullname" . }}
+  labels:
+    {{- include "agent-tessera.labels" . | nindent 4 }}
+data:
+  TESSERA_SERVER_ISSUER: {{ .Values.issuer | quote }}
+  TESSERA_SERVER_ORG: {{ .Values.org | quote }}
+  {{- if .Values.oidc.issuer }}
+  TESSERA_OIDC_ISSUER: {{ .Values.oidc.issuer | quote }}
+  TESSERA_OIDC_CLIENT_ID: {{ .Values.oidc.clientId | quote }}
+  {{- if .Values.oidc.redirectUrl }}
+  TESSERA_OIDC_REDIRECT_URL: {{ .Values.oidc.redirectUrl | quote }}
+  {{- end }}
+  TESSERA_OIDC_REQUIRED: {{ ternary "1" "0" .Values.oidc.required | quote }}
+  {{- if .Values.oidc.adminGroup }}
+  TESSERA_OIDC_ADMIN_GROUP: {{ .Values.oidc.adminGroup | quote }}
+  {{- end }}
+  {{- end }}

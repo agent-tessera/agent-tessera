@@ -1,0 +1,8 @@
+{
+  "grid_g_co2_per_kwh": 400,
+  "models": [
+    {"pattern": "openai/gpt-4o", "joules_per_1k_tokens": 1000},
+    {"pattern": "openai/gpt-4o-mini", "joules_per_1k_tokens": 200},
+    {"pattern": "anthropic/claude-*", "joules_per_1k_tokens": 1500}
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "image": {
+      "type": "object",
+      "properties": {
+        "repository": { "type": "string", "minLength": 1 },
+        "tag": { "type": "string", "minLength": 1 },
+        "pullPolicy": { "type": "string" }
+      },
+      "required": ["repository", "tag"]
+    },
+    "replicaCount": { "type": "integer", "minimum": 1 },
+    "resources": { "type": "object" },
+    "issuer": { "type": "string", "minLength": 1 },
+    "org": { "type": "string", "minLength": 1 },
+    "database": {
+      "type": "object",
+      "properties": {
+        "url": { "type": "string" }
+      }
+    },
+    "kek": {
+      "type": "object",
+      "properties": {
+        "value": { "type": "string" },
+        "existingSecret": { "type": "string" }
+      }
+    },
+    "oidc": {
+      "type": "object",
+      "properties": {
+        "issuer": { "type": "string" },
+        "clientId": { "type": "string" },
+        "clientSecret": { "type": "string" },
+        "redirectUrl": { "type": "string" },
+        "required": { "type": "boolean" },
+        "adminGroup": { "type": "string" }
+      }
+    },
+    "ingress": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "className": { "type": "string" },
+        "host": { "type": "string" },
+        "tls": { "type": "boolean" }
+      },
+      "required": ["enabled", "host"]
+    },
+    "postgresql": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" }
+      }
+    }
+  },
+  "required": ["image", "replicaCount", "issuer", "ingress"]
+}

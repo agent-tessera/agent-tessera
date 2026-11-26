@@ -1,0 +1,32 @@
+apiVersion: tessera/v1
+kind: AgentPolicy
+metadata:
+  agent: AGENT
+  environment: ENV
+  risk_tier: medium
+spec:
+  models:
+    allow: ["openai/gpt-4.1*", "anthropic/claude-*"]
+  tools:
+    allow:
+      - tickets.read
+      - tickets.comment
+    require_approval:
+      - name: tickets.refund
+        when:
+          - arg: amount
+            op: gt
+            value: 100
+    deny:
+      - "shell.*"
+  data:
+    allow: ["crm.customers:read"]
+  approvals:
+    route_to: ["user:ops"]
+    timeout: 30s
+  limits:
+    max_steps_per_task: 25
+  guardrails:
+    required:
+      - input.prompt_injection
+    on_missing: warn

@@ -1,0 +1,11 @@
+apiVersion: v2
+name: agent-tessera
+description: Agent Tessera control plane. An external database is the default.
+type: application
+version: 0.4.1
+appVersion: "0.4.1"
+dependencies:
+  - name: postgresql
+    version: 0.1.0
+    repository: "file://charts-src/postgresql"
+    condition: postgresql.enabled

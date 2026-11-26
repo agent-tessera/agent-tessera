@@ -1,0 +1,45 @@
+site_name: Agent Tessera
+site_description: Identity, permissions, and governance for AI agents.
+repo_name: agent-tessera
+
+theme:
+  name: material
+  features:
+    - content.code.copy
+    - navigation.sections
+
+nav:
+  - Home: index.md
+  - Quickstart: quickstart.md
+  - Policies: policies.md
+  - Registry: registry.md
+  - Server: server.md
+  - Tracing: tracing.md
+  - Footprint: footprint.md
+  - Integrations: integrations.md
+  - Threat model: threat-model.md
+  - API reference:
+      - SDK: reference/sdk.md
+      - Policy: reference/policy.md
+      - Audit: reference/audit.md
+      - Server: reference/server.md
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [sdk/src, server/src]
+          options:
+            docstring_style: google
+            show_source: false
+            show_root_heading: true
+            show_signature_annotations: true
+            separate_signature: true
+            merge_init_into_class: true
+            members_order: source
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences

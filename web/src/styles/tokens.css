@@ -1,0 +1,86 @@
+/* Tessera console design tokens — light and dark (zinc neutrals, teal accent). */
+
+:root {
+    color-scheme: light;
+
+    --background: #fafafa;
+    --foreground: #18181b;
+    --muted: #f4f4f5;
+    /* Slightly darker than zinc-500 so 12px headers clear WCAG AA on muted/panel. */
+    --muted-foreground: #5f5f68;
+    --panel: #ffffff;
+    --border: #e4e4e7;
+    --border-strong: #d4d4d8;
+    --primary: #0f6e6a;
+    --primary-foreground: #f8fafc;
+    --accent-soft: #e4f3f2;
+    --ring: #0f6e6a;
+    --radius: 6px;
+
+    --effect-allow: #15803d;
+    --effect-allow-fg: #14532d;
+    --effect-allow-bg: #dcfce7;
+    --effect-deny: #b91c1c;
+    --effect-deny-fg: #7f1d1d;
+    --effect-deny-bg: #fee2e2;
+    --effect-approval: #b45309;
+    --effect-approval-fg: #78350f;
+    --effect-approval-bg: #fef3c7;
+
+    --status-error: #b91c1c;
+    --status-error-fg: #7f1d1d;
+    --status-error-bg: transparent;
+    --status-revoked: #57534e;
+    --status-revoked-fg: #44403c;
+    --status-revoked-bg: #f5f5f4;
+    --status-running: #0f6e6a;
+    --status-running-fg: #115e59;
+    --status-running-bg: #ccfbf1;
+    --status-ok: #15803d;
+    --status-ok-fg: #14532d;
+    --status-ok-bg: #dcfce7;
+
+    --tessera-font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    --tessera-font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Code", monospace;
+    --text-body: 14px;
+    --text-table: 13px;
+}
+
+.dark {
+    color-scheme: dark;
+
+    --background: #09090b;
+    --foreground: #fafafa;
+    --muted: #27272a;
+    --muted-foreground: #a1a1aa;
+    --panel: #18181b;
+    --border: #3f3f46;
+    --border-strong: #52525b;
+    --primary: #0f6e6a;
+    --primary-foreground: #f8fafc;
+    --accent-soft: #134e4a;
+    --ring: #2dd4bf;
+
+    --effect-allow: #4ade80;
+    --effect-allow-fg: #bbf7d0;
+    --effect-allow-bg: #14532d;
+    --effect-deny: #f87171;
+    --effect-deny-fg: #fecaca;
+    --effect-deny-bg: #7f1d1d;
+    --effect-approval: #fbbf24;
+    --effect-approval-fg: #fde68a;
+    --effect-approval-bg: #78350f;
+
+    --status-error: #f87171;
+    --status-error-fg: #fecaca;
+    --status-error-bg: transparent;
+    --status-revoked: #a8a29e;
+    --status-revoked-fg: #d6d3d1;
+    --status-revoked-bg: #292524;
+    --status-running: #2dd4bf;
+    --status-running-fg: #99f6e4;
+    --status-running-bg: #134e4a;
+    --status-ok: #4ade80;
+    --status-ok-fg: #bbf7d0;
+    --status-ok-bg: #14532d;
+}
