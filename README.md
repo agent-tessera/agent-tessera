@@ -177,7 +177,7 @@ To build the API reference locally: `uv run mkdocs serve`.
 
 ## Status and roadmap
 
-Agent Tessera is at version 0.8.0 and in alpha. Expect API changes before 1.0,
+Agent Tessera is at version 0.9.0 and in alpha. Expect API changes before 1.0,
 and read [CHANGELOG.md](CHANGELOG.md) when you upgrade.
 
 Planned before 1.0: a stable API and policy format, agent-to-agent identity

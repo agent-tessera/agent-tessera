@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from agent_tessera.registry import AgentRegistry, LocalRegistry
     from agent_tessera.types import Action, ActionKind, Decision, Effect, Principal, Reason
 
-__version__ = "0.8.0"
+__version__ = "0.9.0"
 
 __all__ = [
     "Action",

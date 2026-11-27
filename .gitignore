@@ -21,3 +21,6 @@ deploy/helm/agent-tessera/charts/*.tgz
 web/node_modules/
 server/src/tessera_server/web/dist/**
 !server/src/tessera_server/web/dist/.gitkeep
+
+# Local Wrangler cache from the docs deploy
+.wrangler/

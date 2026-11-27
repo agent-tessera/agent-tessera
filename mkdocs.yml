@@ -1,12 +1,18 @@
 site_name: Agent Tessera
 site_description: Identity, permissions, and governance for AI agents.
+site_url: https://agent-tessera.dev/
 repo_name: agent-tessera
+repo_url: https://github.com/agent-tessera/agent-tessera
 
 theme:
   name: material
+  custom_dir: docs/overrides
   features:
     - content.code.copy
     - navigation.sections
+
+extra_css:
+  - assets/home.css
 
 nav:
   - Home: index.md

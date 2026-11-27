@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-26
+
+### Added
+
+- Docs site home page: a short introduction to the project, with links to the
+  quickstart, policies, and threat model.
+
+### Changed
+
+- The docs site is served at `https://agent-tessera.dev/` with a link to the
+  repository.
+
 ## [0.8.0] - 2026-11-25
 
 First public release. Agent Tessera is open source under Apache 2.0 with no

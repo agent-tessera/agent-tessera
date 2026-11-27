@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block styles %}
+  {{ super() }}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block extrahead %}
+  <meta name="theme-color" content="#070b10">
+{% endblock %}
+
+{% block header %}
+  <header class="ts-bar">
+    <a class="ts-brand" href="{{ nav.homepage.url | url }}">
+      <span class="ts-mark" aria-hidden="true"><i></i><i class="is-teal"></i><i class="is-wine"></i><i></i></span>
+      Agent Tessera
+    </a>
+    <nav class="ts-nav" aria-label="Site">
+      <a href="{{ 'quickstart/' | url }}">Quickstart</a>
+      <a href="{{ 'policies/' | url }}">Policies</a>
+      <a href="{{ 'threat-model/' | url }}">Threat model</a>
+      <a href="{{ config.repo_url }}">GitHub</a>
+    </nav>
+  </header>
+{% endblock %}
+
+{% block hero %}
+  {% set rows = [
+    "     tt",
+    "    w  ",
+    "  t   t",
+    "    t  ",
+    "   w  t",
+    "     t ",
+    " t     ",
+    "    t w",
+    "      t",
+  ] %}
+  <div class="ts-home">
+    <section class="ts-hero">
+      <div class="ts-mosaic" aria-hidden="true">
+        {% for row in rows %}
+          {% for ch in row %}
+            <span class="ts-tile{% if ch == 't' %} is-teal{% elif ch == 'w' %} is-wine{% endif %}"></span>
+          {% endfor %}
+        {% endfor %}
+      </div>
+      <div class="ts-hero-copy">
+        <h1>Agent Tessera</h1>
+        <p class="ts-lead">
+          <span class="ts-teal">Default-deny permissions</span> and a
+          <span class="ts-teal">tamper-evident audit log</span> for AI agents,
+          whatever LLM they call.
+        </p>
+        <div class="ts-install-row">
+          <button class="ts-install" type="button" data-copy="pip install agent-tessera">
+            <code>pip install agent-tessera</code>
+            <span class="ts-copy">Copy</span>
+          </button>
+          <p class="ts-meta">Python · Apache 2.0</p>
+        </div>
+        <div class="ts-actions">
+          <a class="ts-btn ts-btn-primary" href="{{ 'quickstart/' | url }}">Read the quickstart</a>
+          <a class="ts-btn" href="https://pypi.org/project/agent-tessera/">PyPI</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="ts-section" aria-labelledby="ts-does">
+      <h2 id="ts-does">What it decides, before the call runs</h2>
+      <div class="ts-cards">
+        <article>
+          <h3>Default deny</h3>
+          <p>Anything the policy does not allow is denied before the function runs. One decision order, documented and tested.</p>
+        </article>
+        <article>
+          <h3>Tamper-evident audit</h3>
+          <p>Every decision is hash-chained. <code>tessera audit verify</code> catches an edit after the fact.</p>
+        </article>
+        <article>
+          <h3>In your process</h3>
+          <p>No network call per decision. The optional server adds registration, signed bundles, a kill switch, and a console.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="ts-section" aria-labelledby="ts-policy">
+      <h2 id="ts-policy">A policy a reviewer can read</h2>
+      <div class="ts-split">
+        <pre class="ts-code"><code>apiVersion: tessera/v1
+kind: AgentPolicy
+metadata:
+  agent: demo
+spec:
+  tools:
+    allow: ["files.read"]</code></pre>
+        <div class="ts-aside">
+          <p>Mark a tool, or wrap the LLM client. <code>files.read</code> runs. <code>shell.run</code> is blocked, and the denial is in the log.</p>
+          <pre class="ts-code ts-code-ok"><code>$ tessera audit verify .tessera/audit.jsonl
+OK: 5 events</code></pre>
+          <a href="{{ 'quickstart/' | url }}">See the two-minute quickstart</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="ts-section" aria-labelledby="ts-with">
+      <h2 id="ts-with">The clients you already use</h2>
+      <ul class="ts-pills">
+        <li>OpenAI</li>
+        <li>Anthropic</li>
+        <li>Bedrock</li>
+        <li>Gemini</li>
+        <li>LiteLLM</li>
+        <li>LangChain</li>
+        <li>MCP</li>
+        <li>CrewAI</li>
+      </ul>
+    </section>
+
+    <section class="ts-limit">
+      <p>It checks the calls you route through it. It is not a sandbox, and it does not detect prompt injection. <a href="{{ 'threat-model/' | url }}">The threat model says what it covers.</a></p>
+    </section>
+
+    <footer class="ts-foot">
+      <p>Apache 2.0 · no commercial edition</p>
+      <p>
+        <a href="{{ config.repo_url }}">GitHub</a>
+        <a href="https://pypi.org/project/agent-tessera/">PyPI</a>
+        <a href="{{ 'server/' | url }}">Control plane</a>
+      </p>
+    </footer>
+  </div>
+  <script>
+    document.querySelectorAll("[data-copy]").forEach(function (el) {
+      el.addEventListener("click", function () {
+        var label = el.querySelector(".ts-copy");
+        var text = el.getAttribute("data-copy");
+        var done = function () { label.textContent = "Copied"; };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done, done);
+        } else {
+          done();
+        }
+      });
+    });
+  </script>
+{% endblock %}
+
+{% block content %}{% endblock %}
+{% block footer %}{% endblock %}

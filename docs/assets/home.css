@@ -1,0 +1,329 @@
+/* Marketing home page. Scoped to the home template. */
+.ts-home {
+  --ts-bg: #070b10;
+  --ts-ink: #f4f7fb;
+  --ts-muted: #9aa3b2;
+  --ts-teal: #2ee6d6;
+  --ts-line: #232b38;
+  --ts-card: #10161f;
+  color: var(--ts-ink);
+  background: var(--ts-bg);
+  font-family: Inter, "Segoe UI", sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+body:has(.ts-home) {
+  background: #070b10;
+}
+
+body:has(.ts-home) .md-main,
+body:has(.ts-home) .md-sidebar,
+body:has(.ts-home) .md-footer {
+  display: none;
+}
+
+.ts-bar {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0.9rem 6vw;
+  background: rgb(7 11 16 / 82%);
+  border-bottom: 1px solid rgb(255 255 255 / 6%);
+  backdrop-filter: blur(14px);
+}
+
+.ts-brand,
+.ts-nav a,
+.ts-foot a,
+.ts-aside a {
+  color: var(--ts-ink);
+  text-decoration: none;
+}
+
+.ts-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.ts-mark {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  width: 18px;
+}
+
+.ts-mark i {
+  display: block;
+  aspect-ratio: 1;
+  border-radius: 2px;
+  background: #1c2430;
+}
+
+.ts-mark .is-teal { background: #1c8f86; }
+.ts-mark .is-wine { background: #6a3040; }
+
+.ts-nav {
+  display: flex;
+  gap: 1.4rem;
+  font-size: 0.875rem;
+}
+
+.ts-nav a { color: #c5ced8; }
+.ts-nav a:hover { color: var(--ts-ink); }
+
+.ts-hero {
+  position: relative;
+  display: grid;
+  align-items: center;
+  min-height: calc(100vh - 4rem);
+  padding: 4.5rem 6vw 5rem;
+  overflow: hidden;
+}
+
+.ts-mosaic {
+  position: absolute;
+  top: 12%;
+  right: 3vw;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 12px;
+  width: min(34vw, 420px);
+  pointer-events: none;
+  mask-image: linear-gradient(90deg, transparent, #000 18%, #000 80%, transparent);
+}
+
+.ts-tile {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  background: #141b26;
+}
+
+.ts-tile.is-teal { background: #1a8f86; }
+.ts-tile.is-wine { background: #6a3040; }
+
+.ts-hero-copy {
+  position: relative;
+  max-width: min(38rem, 58%);
+}
+
+.ts-hero h1 {
+  margin: 0;
+  color: var(--ts-ink);
+  font-size: clamp(2.15rem, 3.6vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+}
+
+.ts-lead {
+  max-width: 36rem;
+  margin: 1.6rem 0 0;
+  color: #d7dee8;
+  font-size: 1.125rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+}
+
+.ts-teal { color: var(--ts-teal); }
+
+.ts-install-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.25rem;
+  margin-top: 2.2rem;
+}
+
+.ts-install {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 0.9rem 0.75rem 1rem;
+  color: var(--ts-ink);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.8125rem;
+  background: transparent;
+  border: 1px solid #3c4656;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.ts-install:hover { border-color: #5c6778; }
+.ts-install code { font-family: inherit; }
+.ts-copy { color: var(--ts-muted); font-family: Inter, "Segoe UI", sans-serif; font-size: 0.8rem; }
+
+.ts-meta {
+  margin: 0;
+  color: #8b95a3;
+  font-size: 0.875rem;
+}
+
+.ts-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.6rem;
+}
+
+.ts-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.55rem 0.85rem;
+  color: var(--ts-ink);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid var(--ts-line);
+  border-radius: 8px;
+}
+
+.ts-btn:hover { border-color: #5c6778; }
+
+.ts-btn-primary {
+  color: #06221f;
+  background: var(--ts-teal);
+  border-color: var(--ts-teal);
+}
+
+.ts-btn-primary:hover { background: #5aefe2; border-color: #5aefe2; }
+
+.ts-section {
+  padding: 1rem 6vw 4.5rem;
+}
+
+.ts-section h2,
+.ts-cards h3 {
+  margin: 0;
+  letter-spacing: -0.03em;
+}
+
+.ts-section h2 {
+  margin-bottom: 1.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.ts-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.ts-cards article {
+  padding: 1.4rem 1.3rem 1.5rem;
+  background: var(--ts-card);
+  border: 1px solid var(--ts-line);
+  border-radius: 16px;
+}
+
+.ts-cards h3 { font-size: 1rem; }
+.ts-cards p,
+.ts-aside p,
+.ts-limit p,
+.ts-foot p {
+  margin: 0.7rem 0 0;
+  color: var(--ts-muted);
+}
+
+.ts-cards code,
+.ts-aside code {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.92em;
+  color: var(--ts-teal);
+}
+
+.ts-split {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.ts-code {
+  margin: 0;
+  padding: 1.3rem 1.4rem;
+  overflow: auto;
+  color: #d7dee8;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  background: #0d131b;
+  border: 1px solid var(--ts-line);
+  border-radius: 16px;
+}
+
+.ts-code-ok { color: #b7f3ec; }
+.ts-aside a { color: var(--ts-teal); }
+.ts-aside .ts-code { margin-top: 1rem; }
+
+.ts-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.ts-pills li {
+  padding: 0.35rem 0.7rem;
+  font-size: 0.875rem;
+  color: #d7dee8;
+  border: 1px solid var(--ts-line);
+  border-radius: 999px;
+}
+
+.ts-limit {
+  margin: 0 6vw;
+  padding: 1.3rem 1.4rem;
+  background: #10161f;
+  border: 1px solid var(--ts-line);
+  border-radius: 16px;
+}
+
+.ts-limit a { color: var(--ts-teal); }
+
+.ts-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.8rem 1.5rem;
+  padding: 2.5rem 6vw 2rem;
+}
+
+.ts-foot p { margin: 0; }
+.ts-foot a { margin-right: 1rem; color: var(--ts-muted); }
+.ts-foot a:hover { color: var(--ts-ink); }
+
+.ts-brand:focus-visible,
+.ts-nav a:focus-visible,
+.ts-btn:focus-visible,
+.ts-install:focus-visible,
+.ts-aside a:focus-visible,
+.ts-limit a:focus-visible,
+.ts-foot a:focus-visible {
+  outline: 2px solid var(--ts-teal);
+  outline-offset: 3px;
+}
+
+@media (max-width: 960px) {
+  .ts-mosaic { display: none; }
+  .ts-cards,
+  .ts-split { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 720px) {
+  .ts-bar { align-items: flex-start; flex-direction: column; gap: 0.7rem; }
+  .ts-nav { flex-wrap: wrap; gap: 0.9rem 1.1rem; }
+  .ts-hero { min-height: auto; padding-top: 3rem; }
+}
